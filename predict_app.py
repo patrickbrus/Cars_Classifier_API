@@ -11,9 +11,13 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing.image import img_to_array
 from flask import request
 from flask import jsonify
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
+
+@app.route('/')
+def my_form():
+    return render_template('predict.html')
 
 def get_model():
     global model
@@ -32,7 +36,7 @@ def preprocess_image(image, target_size):
 print(" * Loading Keras model...")
 get_model()
 
-@app.route("/predict", methods=["POST"])
+@app.route("/", methods=["POST"])
 def predict():
     message = request.get_json(force=True)
     encoded = message['image']

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <title>Cars Classifier App</title>
+    </head>
+    <body>
+        <h1> Cars Classifier API </h1>
+
+        <div class="topdiv">
+            <h2> Load Image and Predict</h2>
+            <input id="image-selector" type="file">
+            <button id="predict-button">Predict</button>
+        </div>
+
+        <p style="font-weight:bold">Predictions</p>
+        <p>Dog: <span id="dog-prediction"></span></p>
+        <p>Cat: <span id="cat-prediction"></span></p>
+        <img id="selected-image" src=""/>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script>
+            let base64Image;
+            $("#image-selector").change(function() {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                let dataURL = reader.result;
+                $("#selected-image").attr("src", dataURL);
+                base64Image = dataURL.replace("data:image/jpg;base64,", "");
+                console.log(base64Image);
+                }
+                reader.readAsDataURL($("#image-selector")[0].files[0]);
+                $("#dog-prediction").text("");
+                $("#cat-prediction").text("");
+            });
+
+            $("#predict-button").click(function(event) {
+                let message = {
+                image : base64Image
+                }
+                console.log(message);
+                $.post("127.0.0.1:8088/predict", JSON.stringify(message), function(response) {
+                $("#dog-prediction").text(response.prediction.dog.toFixed(6));
+                $("#cat-prediction").text(response.prediction.cat.toFixed(6));
+                console.log(response);
+                });
+            });
+        </script>
+    </body>
+
+    <style>
+        canvas {
+            height: 200px;
+            border: 1px solid lightgray;
+        }
+
+        .topdiv {
+            /*Styling the top "header" for my page*/
+            border-top-style: solid;
+            border-bottom-style: solid;
+            border-color: RoyalBlue;
+            border-width: 1px;
+            padding-left: 5px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .normaldiv {
+            border-bottom-style: solid;
+            border-color: RoyalBlue;
+            border-width: 1px;
+            padding-left: 5px;
+            border-collapse: collapse;
+            padding-bottom: 5px;
+        }
+    </style>
+    
+    </html>
