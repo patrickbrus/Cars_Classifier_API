@@ -4,6 +4,7 @@ import io
 from PIL import Image
 from tensorflow import keras
 import tensorflow_addons as tfa
+import csv
 from keras import backend as K
 from keras.models import Sequential
 from keras.models import load_model
@@ -29,12 +30,20 @@ def preprocess_image(image, target_size):
         image = image.convert("RGB")
     image = image.resize(target_size)
     image = img_to_array(image)
+    # normalize input
+    image /= 255.0
     image = np.expand_dims(image, axis=0)
 
     return image
 
-print(" * Loading Keras model...")
-get_model()
+def load_classes(filename=r"data\class_names.csv"):
+    global list_class_names
+    
+    with open(filename, newline="") as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=",")
+        list_class_names = next(csv_reader)
+    
+
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -44,16 +53,28 @@ def predict():
     image = Image.open(io.BytesIO(decoded))
     processed_image = preprocess_image(image, target_size=(256, 256))
     
-    prediction = model.predict(processed_image).tolist()
+    prediction = np.squeeze(model.predict(processed_image))
+
+    winning_class_index = np.argmax(prediction)
+    winning_class = list_class_names[winning_class_index]
+    confidence = prediction[winning_class_index].astype(float)
 
     response = {
         'prediction': {
-            'dog': prediction[0][0],
-            'cat': prediction[0][1]
+            'winning_class': winning_class,
+            'confidence': confidence
         }
     }
     return jsonify(response)
 
 
 if __name__ == "__main__":
+    # load class names first
+    load_classes()
+
+    # load trained tensorflow model
+    print(" * Loading Keras model...")
+    get_model()
+
+    # start flask app
     app.run(port='8088',threaded=False)    
