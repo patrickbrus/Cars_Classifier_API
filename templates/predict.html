@@ -4,58 +4,66 @@
         <title>Cars Classifier App</title>
     </head>
     <body>
-        <div class="title">
-            <h1> Cars Classifier API </h1>
-          </div>
-          
-          
-          <div class="topdiv">
-            <h2> Load Image and Predict</h2>
-            <input id="image-selector" type="file">
-            <button id="predict-button">Predict</button>
-          </div>
-          
-          <div class="middlediv">
-            <h2>Prediction</h2>
-          </div>
-          
-          <div class="normaldiv">
-            <p style="font-weight:bold"> Name of Car Model: <span id="final-prediction" style="font-weight:normal"></span></p>
-            <p style="font-weight:bold"> Score: <span id="final-score" style="font-weight:normal"></span></p>
-          </div>
-          <div class="middlediv">
-            <img id="selected-image" src=""/>
-          </div>
-          
-            <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-            <script>
-              let base64Image;
-              $("#image-selector").change(function() {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                  let dataURL = reader.result;
-                  $("#selected-image").attr("src", dataURL);
-                  base64Image = dataURL.replace("data:image/jpg;base64,", "");
-                  console.log(base64Image);
-                }
-                reader.readAsDataURL($("#image-selector")[0].files[0]);
-                $("#final-prediction").text("");
-                $("#final-score").text("");
-              });
-          
-              $("#predict-button").click(function(event) {
-                let message = {
-                  image : base64Image
-                }
-                console.log(message);
-                $.post("http://127.0.0.1:8088/predict", JSON.stringify(message), function(response) {
-                  $("#final-prediction").text(response.prediction.winning_class);
-                  $("#final-score").text(response.prediction.confidence.toFixed(6));
-                  console.log(response);
-                });
-              });
-            </script>
-          </div>
+      <div class="title">
+        <h1> Cars Classifier API </h1>
+      </div>
+      
+      
+      <div class="topdiv">
+        <h2> Load Image and Predict</h2>
+        <input id="image-selector" type="file">
+        <button id="predict-button">Predict</button>
+      </div>
+      
+      <div class="middlediv">
+        <h2>Prediction</h2>
+      </div>
+      
+      <div class="normaldiv">
+        <p style="font-weight:bold"> Predicted Car Class: <span id="final-prediction" style="font-weight:normal"></span></p>
+        <p style="font-weight:bold"> Score: <span id="final-score" style="font-weight:normal"></span></p>
+      </div>
+      <div class="middlediv">
+        <img id="selected-image" src="" width="256" height="256"/>
+      </div>
+      
+      <div class="bottomdiv">
+        <h3> Overview of Dataset </h3>
+        <p> The dataset from Standford is used to train this model. You can find the dataset and the available car classes <a href="https://ai.stanford.edu/~jkrause/cars/car_dataset.html">here</a>. <br> The code for training the model and all the documentation can be found on my Github page <a href="https://github.com/patrickbrus/Cars_Classifier_API">here</a>.</p>
+      </div>
+      
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script>
+          let base64Image;
+          $("#image-selector").change(function() {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+              let dataURL = reader.result;
+              $("#selected-image").attr("src", dataURL);
+              
+              base64Image = dataURL.replace("data:image/jpg;base64,", "");
+              console.log(base64Image);
+            }
+            reader.readAsDataURL($("#image-selector")[0].files[0]);
+            $("#final-prediction").text("");
+            $("#final-score").text("");
+            $("#trained-cars").text("");
+          });
+      
+          $("#predict-button").click(function(event) {
+            let message = {
+              image : base64Image
+            }
+            console.log(message);
+            $.post("http://127.0.0.1:8088/predict", JSON.stringify(message), function(response) {
+              $("#final-prediction").text(response.prediction.winning_class);
+              $("#final-score").text(response.prediction.confidence.toFixed(6));
+              $("#trained-cars").text(response.prediction.trained_cars);
+              console.log(response);
+            });
+          });
+        </script>
+      </div>
     </body>
 
     <style>
@@ -82,11 +90,20 @@
 
     .middlediv {
         text-align: center;
+        border-bottom-style: solid;
+        border-color: RoyalBlue;
+        border-width: 2px;
         }
     .normaldiv {
         padding-left: 700px;
         padding-bottom: 5px;
         }
+
+    .bottomdiv {
+      padding-top: 1px;
+      padding-left: 5px;
+      text-align: center;
+    }
     </style>
     
     </html>
