@@ -6,7 +6,6 @@ from tensorflow import keras
 import tensorflow_addons as tfa
 import csv
 from keras import backend as K
-from keras.models import Sequential
 from keras.models import load_model
 from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing.image import img_to_array
